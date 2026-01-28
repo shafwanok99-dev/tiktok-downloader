@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>TikTok Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">🎵 TikTok Downloader</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Download video TikTok tanpa watermark
+            </p>
+        </div>
+
+        <!-- Input -->
+        <input
+            id="url"
+            type="text"
+            placeholder="Paste link TikTok di sini..."
+            class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+        >
+
+        <!-- Button -->
+        <button
+            onclick="downloadVideo()"
+            class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold hover:opacity-90 transition"
+        >
+            ⬇️ Download Video
+        </button>
+
+        <!-- Status -->
+        <p id="status" class="text-center text-sm mt-4 text-gray-600"></p>
+
+        <!-- Footer -->
+        <div class="mt-6 text-center text-xs text-gray-400">
+            Gunakan untuk keperluan pribadi 🙏
+        </div>
+    </div>
+
+    <script>
+        function downloadVideo() {
+            const url = document.getElementById("url").value;
+            const status = document.getElementById("status");
+
+            if (!url) {
+                status.innerText = "⚠️ Masukkan link TikTok dulu";
+                status.className = "text-center text-sm mt-4 text-red-500";
+                return;
+            }
+
+            status.innerText = "⏳ Sedang memproses video...";
+            status.className = "text-center text-sm mt-4 text-gray-600";
+
+            fetch("/download", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Gagal download");
+                return res.blob();
+            })
+            .then(blob => {
+                const a = document.createElement("a");
+                a.href = window.URL.createObjectURL(blob);
+                a.download = "tiktok-video.mp4";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                status.innerText = "✅ Download selesai!";
+                status.className = "text-center text-sm mt-4 text-green-600";
+            })
+            .catch(err => {
+                status.innerText = "❌ Error: " + err.message;
+                status.className = "text-center text-sm mt-4 text-red-500";
+            });
+        }
+    </script>
+
+</body>
+</html>
